@@ -14,15 +14,17 @@ from pulp import *
 
 
 class Solver:
-	def __init__(self, starting_cells: list[tuple[int, int, int]]):
+	def __init__(self, starting_cells: None | list[tuple[int, int, int]] = None):
 		"""Initialize the constraint programming problem, decision variables, and known cells,
 		starting cells are in the format [(row, col, value)...]"""
 
 		self.prob = LpProblem('Sudoku')  # no objective, just a list of constraints
 		self._all_cells = self._set_decision_variables()
 		self._set_fixed_constraints()
-		self._starting_cells = starting_cells
-		self._set_constraint_starting_cells(self._starting_cells)
+
+		if starting_cells:
+			self._starting_cells = starting_cells
+			self._set_constraint_starting_cells(self._starting_cells)
 
 	@staticmethod
 	def _set_decision_variables() -> dict:
@@ -76,9 +78,14 @@ class Solver:
 			if val > 0:  # a 0 is an empty cell
 				self.prob += self._all_cells[(row, col, val)] == 1
 
-	def solve_puzzle(self) -> LpStatus:
+	def set_starting_cells(self, starting_cells):
+		"""Sets up the starting (known) cells in the grid"""
+		self._starting_cells = starting_cells
+		self._set_constraint_starting_cells(self._starting_cells)
+
+	def solve_puzzle(self) -> str:
 		"""Solves the puzzle; returns status from the solver"""
-		self.prob.solve(PULP_CBC_CMD(logPath=r'path.lp'))
+		self.prob.solve(PULP_CBC_CMD(logPath=r'solution_log.lp'))
 		return LpStatus[self.prob.status]
 
 	def parse_solution(self) -> list[tuple[int, int, int]]:
