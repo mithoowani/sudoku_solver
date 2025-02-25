@@ -28,7 +28,8 @@ class Cell(Digits, can_focus=True):
 
 	def on_key(self, event: events.Key):
 		if event.key.isdigit():
-			self.output = int(event.key)
+			if int(event.key) > 0:
+				self.output = int(event.key)
 		elif event.key == 'k':  # increment
 			if self.output == 'x':
 				self.output = 1
@@ -63,7 +64,7 @@ class Box(Container):
 			yield Cell(id=cell_id)
 
 
-class Sudoku(App):
+class SudokuApp(App):
 	"""A screen representing a 9 x 9 Sudoku grid"""
 
 	CSS_PATH = 'layout.tcss'
@@ -166,12 +167,13 @@ class Sudoku(App):
 		return solution
 
 	def display_solution(self, solution):
-		"""Displays the puzzle's solution on the grid; displays a message if no solution was found"""
+		"""Displays the puzzle's solution on the grid"""
 		if not solution:
 			self.display_message('Solution not found')
 		else:
 			for row, col, val in solution:
 				self.query_one(f'#_{row}_{col}').output = val
+			self.display_message('Solution found')
 
 	@staticmethod
 	def get_cell_row_col(cell: Cell) -> (int, int):
@@ -180,5 +182,5 @@ class Sudoku(App):
 
 
 if __name__ == '__main__':
-	app = Sudoku()
+	app = SudokuApp()
 	app.run()
